@@ -12,6 +12,14 @@ class SkipListNode<T> {
     this.next = [];
     this.value = value;
   }
+
+  get firstNext() {
+    const firstNext = this.next[0];
+    if (firstNext === undefined) {
+      throw new Error("firstNext is undefined");
+    }
+    return firstNext;
+  }
 }
 const isSentinel = (node: SkipListNode<any>) => node.value === null;
 
@@ -26,7 +34,8 @@ export class SkipList<T> {
   private head: SkipListNode<T>;
   private probability: number;
 
-  private _comparator(a: T, b: T): number {
+  private _comparator(a: T, b: T): number;
+  private _comparator(): never {
     throw new Error("Not implemented");
   }
 
@@ -46,7 +55,7 @@ export class SkipList<T> {
    * a  >  b returns  1
    */
   set comparator(comp: (a: T, b: T) => number) {
-    if (!isSentinel(this.head.next[0])) {
+    if (!isSentinel(this.head.firstNext)) {
       throw new Error("Cannot change comparator after adding elements");
     }
     this._comparator = comp;
@@ -63,8 +72,8 @@ export class SkipList<T> {
    */
   insert(value: T) {
     const newNode = new SkipListNode(value);
-    if (isSentinel(this.head.next[0])) {
-      newNode.next[0] = this.head.next[0];
+    if (isSentinel(this.head.firstNext)) {
+      newNode.next[0] = this.head.firstNext;
       this.head.next[0] = newNode;
       return newNode;
     }
@@ -83,6 +92,7 @@ export class SkipList<T> {
       level++;
       flip = Math.random();
     }
+    return newNode;
   }
 
   /**
@@ -93,7 +103,7 @@ export class SkipList<T> {
   }
 
   [Symbol.iterator]() {
-    let current = this.head.next[0];
+    let current = this.head.firstNext;
     return {
       next: () => {
         const done = isSentinel(current);
@@ -102,7 +112,7 @@ export class SkipList<T> {
           return { done };
         }
         const value: T = current.value!;
-        current = current.next[0];
+        current = current.firstNext;
         return { done, value };
       },
     };
@@ -121,7 +131,7 @@ export class SkipList<T> {
     }
 
     const { next } = from;
-    const right = next[level];
+    const right = next[level] || SkipListNode.createSentinel<T>();
 
     if (isSentinel(right) || this.compare(sought, right) < 0) {
       if (level === 0) {

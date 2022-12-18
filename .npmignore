@@ -1,0 +1,8 @@
+node_modules/
+coverage/
+src/
+__test__/
+jest*
+tsconfig.json
+*.tsbuildinfo
+*.tgz
