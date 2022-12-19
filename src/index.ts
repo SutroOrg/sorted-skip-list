@@ -62,6 +62,12 @@ export class SkipList<T> {
   }
 
   private compare(a: SkipListNode<T>, b: SkipListNode<T>): number {
+    if (isSentinel(a)) {
+      return 1;
+    }
+    if (isSentinel(b)) {
+      return -1;
+    }
     return this._comparator(a.value!, b.value!);
   }
 
